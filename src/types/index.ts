@@ -116,6 +116,8 @@ export interface Project {
   progress: number;
   createdAt: string;
   tags?: string[];
+  budgetTotal?: number;
+  budgetCurrency?: string;
 }
 
 export interface RoadmapStage {

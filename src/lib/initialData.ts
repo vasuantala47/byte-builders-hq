@@ -102,6 +102,8 @@ export const INITIAL_PROJECT: Project = {
   deadline: "2025-03-15",
   createdAt: "2025-02-05",
   tags: ["Hardware", "ESP32", "LoRa", "Disaster Response", "Sensors"],
+  budgetTotal: 250,
+  budgetCurrency: "USD",
 };
 
 export const INITIAL_IDEAS: Idea[] = [

@@ -36,6 +36,7 @@ export const CommandCenterView: React.FC = () => {
     activityLogs,
     achievements,
     expenses,
+    currentMember,
     setActiveTab,
     setIsContributeOpen,
     setIsByteBotOpen,
@@ -66,22 +67,59 @@ export const CommandCenterView: React.FC = () => {
   const latestProto = prototypes[prototypes.length - 1];
 
   // Budget calculations
-  const totalBudget = 150.0;
+  const totalBudget = project.budgetTotal || 250.0;
   const totalSpent = expenses.reduce((acc, curr) => acc + curr.cost, 0);
   const remainingBudget = Math.max(0, totalBudget - totalSpent);
 
   return (
     <div className="space-y-6 animate-in fade-in">
+      {/* Friendly Human Welcome Banner */}
+      <div className="hardware-card p-6 relative overflow-hidden bg-gradient-to-r from-slate-900/90 via-slate-900/70 to-slate-950 border border-slate-800/80 shadow-md">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-cyan-400">Welcome back,</span>
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 font-bold border border-cyan-500/20">
+                {currentMember.name} ({currentMember.callsign})
+              </span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+              Ready to innovate, build, and improve today?
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl">
+              All 6 teammates have equal contributor access. Track hardware components, collaborate on ideas, test prototypes, and maintain your sprint momentum.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 self-stretch sm:self-auto shrink-0">
+            <button
+              onClick={() => setIsContributeOpen(true)}
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-slate-950 font-bold text-xs shadow-md shadow-cyan-500/20 transition-all flex items-center gap-1.5"
+            >
+              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <span>Contribute</span>
+            </button>
+            <button
+              onClick={() => setIsByteBotOpen(true)}
+              className="px-3.5 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-cyan-300 text-xs font-semibold border border-slate-700 transition-all flex items-center gap-1.5"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Ask ByteBot</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Demo Data Banner if active */}
       {isDemoData && (
-        <div className="px-4 py-2.5 rounded-xl bg-cyan-950/30 border border-cyan-500/30 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs text-cyan-300 font-mono">
+        <div className="px-4 py-2.5 rounded-xl bg-cyan-950/20 border border-cyan-500/20 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs text-cyan-300">
             <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
             <span>Sample Hardware Hackathon Dataset Loaded (Project AeroPulse)</span>
           </div>
           <button
             onClick={() => setActiveTab("settings")}
-            className="text-[11px] text-cyan-400 hover:text-cyan-200 underline font-mono"
+            className="text-[11px] text-cyan-400 hover:text-cyan-200 underline font-medium"
           >
             Clear or customize in Settings →
           </button>

@@ -99,6 +99,11 @@ interface TeamContextType {
   updateProject: (updates: Partial<Project>) => void;
   updateStageStatus: (stageId: string, status: "Pending" | "In Progress" | "Completed") => void;
   toggleStageChecklist: (stageId: string, checklistId: string) => void;
+  addStage: (stageData: Omit<RoadmapStage, "id">) => RoadmapStage;
+  updateStage: (stageId: string, updates: Partial<RoadmapStage>) => void;
+  deleteStage: (stageId: string) => void;
+  addStageChecklistItem: (stageId: string, text: string) => void;
+  deleteStageChecklistItem: (stageId: string, checklistId: string) => void;
 
   addComponent: (data: Omit<ComponentItem, "id" | "createdAt">) => ComponentItem;
   updateComponent: (id: string, updates: Partial<ComponentItem>) => void;
@@ -118,7 +123,9 @@ interface TeamContextType {
   sendChatMessage: (channelId: string, content: string, attachments?: string[]) => void;
   addMessageReaction: (messageId: string, emoji: string) => void;
 
+  updateBudgetTotal: (total: number) => void;
   addExpense: (data: Omit<BudgetExpense, "id" | "purchasedById">) => BudgetExpense;
+  updateExpense: (id: string, updates: Partial<BudgetExpense>) => void;
   deleteExpense: (id: string) => void;
 
   addAchievement: (title: string, description: string, icon?: string) => void;
@@ -614,6 +621,57 @@ export function TeamProvider({ children }: { children: React.ReactNode }) {
     persist({ ...data, stages: updated });
   };
 
+  const addStage = (stageData: Omit<RoadmapStage, "id">) => {
+    if (!data) throw new Error("Workspace not ready");
+    const newStage: RoadmapStage = {
+      ...stageData,
+      id: generateId("stage"),
+      order: stageData.order || data.stages.length + 1,
+      checklist: stageData.checklist || [],
+    };
+    persist({ ...data, stages: [...data.stages, newStage] });
+    logActivity("system", `Created roadmap milestone: "${newStage.name}"`, currentMember.id, "roadmap");
+    return newStage;
+  };
+
+  const updateStage = (stageId: string, updates: Partial<RoadmapStage>) => {
+    if (!data) return;
+    const updated = data.stages.map((s) => (s.id === stageId ? { ...s, ...updates } : s));
+    persist({ ...data, stages: updated });
+    logActivity("system", `Updated milestone "${updates.name || "stage"}"`, currentMember.id, "roadmap");
+  };
+
+  const deleteStage = (stageId: string) => {
+    if (!data) return;
+    const target = data.stages.find((s) => s.id === stageId);
+    persist({ ...data, stages: data.stages.filter((s) => s.id !== stageId) });
+    logActivity("system", `Deleted milestone "${target?.name || stageId}"`, currentMember.id, "roadmap");
+  };
+
+  const addStageChecklistItem = (stageId: string, text: string) => {
+    if (!data || !text.trim()) return;
+    const updated = data.stages.map((s) => {
+      if (s.id !== stageId) return s;
+      return {
+        ...s,
+        checklist: [...s.checklist, { id: generateId("chk"), text: text.trim(), done: false }],
+      };
+    });
+    persist({ ...data, stages: updated });
+  };
+
+  const deleteStageChecklistItem = (stageId: string, checklistId: string) => {
+    if (!data) return;
+    const updated = data.stages.map((s) => {
+      if (s.id !== stageId) return s;
+      return {
+        ...s,
+        checklist: s.checklist.filter((c) => c.id !== checklistId),
+      };
+    });
+    persist({ ...data, stages: updated });
+  };
+
   // Components & Inventory
   const addComponent = (compData: Omit<ComponentItem, "id" | "createdAt">) => {
     if (!data) throw new Error("Workspace not ready");
@@ -758,6 +816,12 @@ export function TeamProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Budget
+  const updateBudgetTotal = (total: number) => {
+    if (!data) return;
+    persist({ ...data, project: { ...data.project, budgetTotal: total } });
+    logActivity("system", `Updated total team budget cap to $${total.toFixed(2)}`, currentMember.id, "budget");
+  };
+
   const addExpense = (expData: Omit<BudgetExpense, "id" | "purchasedById">) => {
     if (!data) throw new Error("Workspace not ready");
     const item: BudgetExpense = {
@@ -770,9 +834,18 @@ export function TeamProvider({ children }: { children: React.ReactNode }) {
     return item;
   };
 
+  const updateExpense = (id: string, updates: Partial<BudgetExpense>) => {
+    if (!data) return;
+    const updated = data.expenses.map((e) => (e.id === id ? { ...e, ...updates } : e));
+    persist({ ...data, expenses: updated });
+    logActivity("system", `Updated expense: "${updates.item || "item"}"`, currentMember.id, "budget");
+  };
+
   const deleteExpense = (id: string) => {
     if (!data) return;
+    const target = data.expenses.find((e) => e.id === id);
     persist({ ...data, expenses: data.expenses.filter((e) => e.id !== id) });
+    logActivity("system", `Deleted expense: "${target?.item || "item"}"`, currentMember.id, "budget");
   };
 
   // Achievements
@@ -1055,6 +1128,11 @@ export function TeamProvider({ children }: { children: React.ReactNode }) {
         updateProject,
         updateStageStatus,
         toggleStageChecklist,
+        addStage,
+        updateStage,
+        deleteStage,
+        addStageChecklistItem,
+        deleteStageChecklistItem,
         addComponent,
         updateComponent,
         deleteComponent,
@@ -1067,7 +1145,9 @@ export function TeamProvider({ children }: { children: React.ReactNode }) {
         updateWikiArticle,
         sendChatMessage,
         addMessageReaction,
+        updateBudgetTotal,
         addExpense,
+        updateExpense,
         deleteExpense,
         addAchievement,
         uploadProjectFile,
