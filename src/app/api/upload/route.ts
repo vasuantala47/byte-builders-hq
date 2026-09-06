@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import os from "os";
 
 function formatBytes(bytes: number): string {
   if (bytes === 0) return "0 B";
@@ -37,7 +38,10 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
+    const uploadsDir = process.env.VERCEL
+      ? path.join(os.tmpdir(), "byte_builders_uploads")
+      : path.join(process.cwd(), "public", "uploads");
+
     if (!fs.existsSync(uploadsDir)) {
       fs.mkdirSync(uploadsDir, { recursive: true });
     }

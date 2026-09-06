@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import os from "os";
 
 export async function GET(
   req: NextRequest,
@@ -9,7 +10,12 @@ export async function GET(
   try {
     const { filename } = await params;
     const sanitized = path.basename(filename);
-    const filePath = path.join(process.cwd(), "public", "uploads", sanitized);
+
+    const uploadsDir = process.env.VERCEL
+      ? path.join(os.tmpdir(), "byte_builders_uploads")
+      : path.join(process.cwd(), "public", "uploads");
+
+    const filePath = path.join(uploadsDir, sanitized);
 
     if (!fs.existsSync(filePath)) {
       return NextResponse.json({ error: "File not found" }, { status: 404 });

@@ -155,7 +155,7 @@ interface TeamContextType {
 const TeamContext = createContext<TeamContextType | undefined>(undefined);
 
 export function TeamProvider({ children }: { children: React.ReactNode }) {
-  const [data, setData] = useState<TeamWorkspaceData | null>(null);
+  const [data, setData] = useState<TeamWorkspaceData>(() => getDefaultWorkspaceData(true));
   const [currentMemberId, setCurrentMemberId] = useState<string>("member-1");
   const [activeTab, setActiveTab] = useState<TabType>("command-center");
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true); // Default true for seamless lab access, customizable

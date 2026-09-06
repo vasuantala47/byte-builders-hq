@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-09-06T08:51:18.312Z",
+  "lastUpdated": "2026-09-06T08:55:33.247Z",
   "isDemoData": false,
   "project": {
     "id": "proj-clean",
@@ -11,7 +11,7 @@
     "status": "Planning",
     "progress": 0,
     "createdAt": "2026-09-06T08:33:44.921Z",
-    "budgetTotal": 500
+    "budgetTotal": 5000
   },
   "members": [
     {
@@ -445,25 +445,6 @@
           "done": false
         }
       ]
-    },
-    {
-      "id": "stage-test-milestone",
-      "name": "Custom Field Validation & Long-Range Drone Flight",
-      "checklist": [
-        {
-          "done": true,
-          "id": "chk-1",
-          "text": "Range test LoRa with directional Yagi antenna"
-        },
-        {
-          "done": false,
-          "id": "chk-2",
-          "text": "Log gas sensor ppm baseline at 20 knots airspeed"
-        }
-      ],
-      "description": "Testing LoRa telemetry payload at 5km range and 50m altitude.",
-      "order": 14,
-      "status": "In Progress"
     }
   ],
   "tasks": [],
